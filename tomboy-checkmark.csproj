@@ -37,4 +37,10 @@
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Compile Include="Checkmark.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Checkmark.addin.xml" />
+  </ItemGroup>
 </Project>

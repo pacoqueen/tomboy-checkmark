@@ -1,0 +1,21 @@
+<Addin id="CheckmarkAddin"
+	namespace="Tomboy"
+	name="Insert checkmark"
+	author="Francisco José Rodríguez Bogado (bogado@qinn.es)"
+	description="Changes [ ] and [x] for unicode chars ☐ and ☑"
+	category="Tools"
+	defaultEnabled="false"
+	version="0.1">
+	
+	<Runtime>
+		<Import assembly="Checkmark.dll" />
+	</Runtime>
+	
+	<Dependencies>
+		<Addin id="Tomboy" version="0.10" />
+	</Dependencies>
+	
+	<Extension path="/Tomboy/NoteAddins">
+		<NoteAddin type="Tomboy.Checkmark.Checkmark" />
+	</Extension>
+</Addin>
