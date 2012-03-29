@@ -5,7 +5,7 @@
 	description="Changes [ ] and [x] for unicode chars ☐ and ☑"
 	category="Tools"
 	defaultEnabled="false"
-	version="0.1">
+	version="0.2">
 	
 	<Runtime>
 		<Import assembly="Checkmark.dll" />
