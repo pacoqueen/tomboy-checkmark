@@ -22,6 +22,7 @@
 using System;
 using Gtk;
 using Tomboy;
+using Mono.Unix;
 
 namespace Tomboy.Todo{
     public class Todo:NoteAddin{
