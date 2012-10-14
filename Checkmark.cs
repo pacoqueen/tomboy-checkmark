@@ -24,8 +24,13 @@ using Gtk;
 using Tomboy;
 using Mono.Unix;
 
-namespace Tomboy.Todo{
-    public class Todo:NoteAddin{
+/* TODO: Al pinchar con el ratón en ☐, cambiar a marcado y viceversa. Dar
+   opción también para tachar el texto a continuación hasta el siguiente salto
+   de línea.
+*/
+
+namespace Tomboy.Checkmark{
+    public class CheckmarkAddin:NoteAddin{
 
         Gtk.MenuItem item;
 

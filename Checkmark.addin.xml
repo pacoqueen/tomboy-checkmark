@@ -16,6 +16,6 @@
 	</Dependencies>
 	
 	<Extension path="/Tomboy/NoteAddins">
-		<NoteAddin type="Tomboy.Checkmark.Checkmark" />
+		<NoteAddin type="Tomboy.Checkmark.CheckmarkAddin" />
 	</Extension>
 </Addin>
