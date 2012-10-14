@@ -2,7 +2,7 @@
 //  Checkmark.cs
 //  
 //  Author:
-//       Francisco José Rodríguez Bogado <frbogado@novaweb.es>
+//       Francisco José Rodríguez Bogado <bogado@qinn.es>
 // 
 //  Copyright (c) 2012 Francisco José Rodríguez Bogado
 // 
