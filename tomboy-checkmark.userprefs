@@ -2,8 +2,8 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Checkmark.cs">
     <Files>
-      <File FileName="Checkmark.cs" Line="34" Column="1" />
-      <File FileName="Checkmark.addin.xml" Line="19" Column="41" />
+      <File FileName="Checkmark.cs" Line="80" Column="13" />
+      <File FileName="Checkmark.addin.xml" Line="5" Column="60" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

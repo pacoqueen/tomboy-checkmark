@@ -34,52 +34,72 @@ namespace Tomboy.Checkmark{
 
         Gtk.MenuItem item;
 
-        /*
-        static string[] TODO_PATTERNS = {
-            "FIXME",
-            "TODO",
-            "XXX"
+        static string[] UNCHECK_PATTERNS = {
+            "[ ]",
+            "[]"
         };
-        */
+
+        static string[] CHECK_PATTERNS = {
+            "[x]",
+            "[X]"
+        };
 
         public override void Initialize(){
             item = new Gtk.MenuItem(Catalog.GetString("Insert checkbox"));
-            item.Activated += OnMenuItemActivated;
+            item.Activated += OnMenuItemActivatedUnmarked;
             item.Show();
             AddPluginMenuItem(item);
-            /*
-            foreach (string s in TODO_PATTERNS) {
-                if (Note.TagTable.Lookup(s) == null) {
-                    TextTag tag = new TextTag(s);
-                    tag.Foreground = "#0080f0";
-                    tag.Weight = Pango.Weight.Bold;
-                    tag.Underline = Pango.Underline.Single;
-                    Note.TagTable.Add(tag);
-                }
-            }
-            */
+            item = new Gtk.MenuItem(Catalog.GetString("Insert marked checkbox"));
+            item.Activated += OnMenuItemActivatedMarked;
+            item.Show();
+            AddPluginMenuItem(item);
         }
     
         public override void Shutdown(){
-            item.Activated -= OnMenuItemActivated;
+            item.Activated -= OnMenuItemActivatedMarked;
+            item.Activated -= OnMenuItemActivatedUnmarked;
         }
     
         public override void OnNoteOpened(){
             /* Buffer.InsertText += OnInsertText;
             Buffer.DeleteRange += OnDeleteRange;
             HighlightNote(); */
+            MakeSubs();
         }
 
-        void OnMenuItemActivated(object sender, EventArgs args){
-            string text = "☐";
+        public void MakeSubs(){
+            string text_marked = "☑";
+            string text_unmarked = "☐";
+            NoteBuffer buffer = Note.Buffer;
+            string contenido_nota = buffer.Text;
+            foreach (string s in CHECK_PATTERNS) {
+                contenido_nota = contenido_nota.Replace(s, text_marked);
+            }
+            foreach (string s in UNCHECK_PATTERNS) {
+                contenido_nota = contenido_nota.Replace(s, text_unmarked);
+            }
+            // FIXME: Esto no respeta formatos ni nada... :(
+            //buffer.Text = contenido_nota;
+        }
+
+        void OnMenuItemActivatedUnmarked(object sender, EventArgs args){
+            string text_unmarked = "☐";
 
             // Logger.Log("Activated 'Insert checkbox' menu item.");
 
             NoteBuffer buffer = Note.Buffer;
             Gtk.TextIter cursor = buffer.GetIterAtMark (buffer.InsertMark);
-            buffer.InsertWithTagsByName (ref cursor, text, "checkbox");
+            buffer.InsertWithTagsByName (ref cursor, text_unmarked, "checkbox");
         }
-    
+
+        void OnMenuItemActivatedMarked(object sender, EventArgs args){
+            string text_marked = "☑";
+
+            NoteBuffer buffer = Note.Buffer;
+            Gtk.TextIter cursor = buffer.GetIterAtMark (buffer.InsertMark);
+            buffer.InsertWithTagsByName (ref cursor, text_marked, "marked_checkbox");
+        }
+
         /*
         private void OnInsertText(object sender, Gtk.InsertTextArgs args){
             HighlightRegion(args.Pos, args.Pos);
