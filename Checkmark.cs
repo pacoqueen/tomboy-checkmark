@@ -71,15 +71,37 @@ namespace Tomboy.Checkmark{
             string text_marked = "☑";
             string text_unmarked = "☐";
             NoteBuffer buffer = Note.Buffer;
-            string contenido_nota = buffer.Text;
             foreach (string s in CHECK_PATTERNS) {
-                contenido_nota = contenido_nota.Replace(s, text_marked);
+                Reemplazar(buffer, s, text_marked);
             }
             foreach (string s in UNCHECK_PATTERNS) {
-                contenido_nota = contenido_nota.Replace(s, text_unmarked);
+                Reemplazar(buffer, s, text_unmarked);
             }
-            // FIXME: Esto no respeta formatos ni nada... :(
-            //buffer.Text = contenido_nota;
+        }
+
+        void Reemplazar(NoteBuffer b, string s, string r){
+            /*
+             * Changes every occurrences of string s for r in buffer b.
+             */
+            bool found;
+            Gtk.TextIter ss;    // Start of slice containing the occurrence
+            Gtk.TextIter es;    // End of slice
+            Gtk.TextIter w;     // Where to insert "r".
+            Gtk.TextMark m;     // Mark to insert.
+
+            do{
+                found = b.StartIter.ForwardSearch(s, Gtk.TextSearchFlags.TextOnly,
+                                            out ss, out es, b.EndIter);
+                if (found){
+                    //start = es; // Search is started after "s" in next iteration
+                    //b.InsertInteractive(ref es, r, true);
+                    m = b.CreateMark("check", ss, false);
+                    b.Delete(ref ss, ref es);
+                    w = b.GetIterAtMark(m);
+                    b.Insert(w, r);
+                    //found = false;
+                }
+            }while (found);
         }
 
         void OnMenuItemActivatedUnmarked(object sender, EventArgs args){

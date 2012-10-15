@@ -2,7 +2,7 @@
 //  AssemblyInfo.cs
 //  
 //  Author:
-//       Francisco José Rodríguez Bogado <frbogado@novaweb.es>
+//       Francisco José Rodríguez Bogado <bogado@qinn.es>
 // 
 //  Copyright (c) 2012 Francisco José Rodríguez Bogado
 // 
@@ -27,7 +27,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("tomboy-checkmark")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Novaweb Área Virtual, S. L.")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("")]
 [assembly: AssemblyCopyright("Francisco José Rodríguez Bogado")]
 [assembly: AssemblyTrademark("")]

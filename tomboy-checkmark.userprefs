@@ -1,9 +1,11 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Checkmark.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="README">
     <Files>
-      <File FileName="Checkmark.cs" Line="80" Column="13" />
-      <File FileName="Checkmark.addin.xml" Line="5" Column="60" />
+      <File FileName="Checkmark.cs" Line="1" Column="1" />
+      <File FileName="Checkmark.addin.xml" Line="1" Column="1" />
+      <File FileName="compile.sh" Line="1" Column="1" />
+      <File FileName="README" Line="1" Column="71" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
