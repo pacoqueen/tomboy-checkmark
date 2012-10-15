@@ -41,7 +41,9 @@ namespace Tomboy.Checkmark{
 
         static string[] CHECK_PATTERNS = {
             "[x]",
-            "[X]"
+            "[X]",
+            "[v]",
+            "[V]"
         };
 
         public override void Initialize(){
@@ -61,10 +63,10 @@ namespace Tomboy.Checkmark{
         }
     
         public override void OnNoteOpened(){
-            /* Buffer.InsertText += OnInsertText;
-            Buffer.DeleteRange += OnDeleteRange;
+            MakeSubs(); // Text inserted with plugin deactivated changes now.
+            Buffer.InsertText += OnInsertText;
+            /* Buffer.DeleteRange += OnDeleteRange;
             HighlightNote(); */
-            MakeSubs();
         }
 
         public void MakeSubs(){
@@ -84,22 +86,22 @@ namespace Tomboy.Checkmark{
              * Changes every occurrences of string s for r in buffer b.
              */
             bool found;
-            Gtk.TextIter ss;    // Start of slice containing the occurrence
-            Gtk.TextIter es;    // End of slice
             Gtk.TextIter w;     // Where to insert "r".
             Gtk.TextMark m;     // Mark to insert.
+            Gtk.TextIter ss;    // Start of slice containing the occurrence
+            Gtk.TextIter es;    // End of slice
 
             do{
                 found = b.StartIter.ForwardSearch(s, Gtk.TextSearchFlags.TextOnly,
                                             out ss, out es, b.EndIter);
                 if (found){
                     //start = es; // Search is started after "s" in next iteration
-                    //b.InsertInteractive(ref es, r, true);
+                    // O(n) becomes O(n²), but modify start iter causes a core dump.
+                    // Can't modify TextIters because deletion and so on invalidates them.
                     m = b.CreateMark("check", ss, false);
                     b.Delete(ref ss, ref es);
                     w = b.GetIterAtMark(m);
-                    b.Insert(w, r);
-                    //found = false;
+                    b.Insert(ref w, r);
                 }
             }while (found);
         }
@@ -122,11 +124,11 @@ namespace Tomboy.Checkmark{
             buffer.InsertWithTagsByName (ref cursor, text_marked, "marked_checkbox");
         }
 
-        /*
         private void OnInsertText(object sender, Gtk.InsertTextArgs args){
-            HighlightRegion(args.Pos, args.Pos);
+            MakeSubs();
         }
-    
+
+        /*
         private void OnDeleteRange (object sender, Gtk.DeleteRangeArgs args){
             HighlightRegion(args.Start, args.End);
         }
