@@ -79,6 +79,7 @@ namespace Tomboy.Checkmark{
         public override void OnNoteOpened(){
             MakeSubs(); // Text inserted with plugin deactivated changes now.
             Buffer.InsertText += OnInsertText;
+			Note.ButtonPressEvent += ButtonPressed;
         }
 
         public void MakeSubs(){
@@ -176,6 +177,9 @@ namespace Tomboy.Checkmark{
         private void OnInsertText(object sender, Gtk.InsertTextArgs args){
             MakeSubs();
         }
-
+		
+		private void ButtonPressed(object sender, Gtk.ButtonPressEventArgs args){
+			Logger.Info("SOY YO");
+		}
     }
 }
