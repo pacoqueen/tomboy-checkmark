@@ -23,6 +23,7 @@ using System;
 using Gtk;
 using Tomboy;
 using Mono.Unix;
+using System.Collections.Generic;
 
 /* TODO: Al pinchar con el ratón en ☐, cambiar a marcado y viceversa. Dar
    opción también para tachar el texto a continuación hasta el siguiente salto
@@ -84,26 +85,50 @@ namespace Tomboy.Checkmark{
         void Reemplazar(NoteBuffer b, string s, string r){
             /*
              * Changes every occurrences of string s for r in buffer b.
+             * Why three passess? Because TextIter left invalidated every time I modify
+             * content of a note. I use marks to postprocessing deletions and insertions.
+             * Despite that, still invalidation warnings happens.
              */
             bool found;
             Gtk.TextIter w;     // Where to insert "r".
-            Gtk.TextMark m;     // Mark to insert.
+            List<Gtk.TextMark> inserciones = new List<Gtk.TextMark>();
+                                // Marks to insert.
             Gtk.TextIter ss;    // Start of slice containing the occurrence
             Gtk.TextIter es;    // End of slice
+            List<Gtk.TextMark> comienzos = new List<Gtk.TextMark>();
+            List<Gtk.TextMark> finales = new List<Gtk.TextMark>();
+            int i = 0;
+            int j;
+            Gtk.TextIter pos;
 
+            // First pass. Finding...
+            pos = b.StartIter;
             do{
-                found = b.StartIter.ForwardSearch(s, Gtk.TextSearchFlags.TextOnly,
-                                            out ss, out es, b.EndIter);
+                found = pos.ForwardSearch(s, Gtk.TextSearchFlags.TextOnly,
+                                          out ss, out es, b.EndIter);
                 if (found){
-                    //start = es; // Search is started after "s" in next iteration
-                    // O(n) becomes O(n²), but modify start iter causes a core dump.
-                    // Can't modify TextIters because deletion and so on invalidates them.
-                    m = b.CreateMark("check", ss, false);
-                    b.Delete(ref ss, ref es);
-                    w = b.GetIterAtMark(m);
-                    b.Insert(ref w, r);
+                    inserciones.Add(b.CreateMark("check" + i.ToString(), ss, false));
+                    comienzos.Add(b.CreateMark("comienzo" + i.ToString(), ss, false));
+                    finales.Add(b.CreateMark("final" + i.ToString(), es, false));
+                    i++;
+                    pos = es;   // Search is started after "s" in next iteration
+                    // (Tomboy:7048): Gtk-WARNING **: Invalid text buffer iterator...
+                    //b.Delete(ref ss, ref es);
+                    //w = b.GetIterAtMark(m);
+                    //b.Insert(ref w, r);
                 }
             }while (found);
+            // Second pass. Replacing...
+            for (j = 0; j < i; j++){
+                ss = b.GetIterAtMark(comienzos[j]);
+                es = b.GetIterAtMark(finales[j]);
+                b.Delete(ref ss, ref es);
+            }
+            // Third pass. Inserting...
+            for (j = 0; j < i; j++){
+                w = b.GetIterAtMark(inserciones[j]);
+                b.Insert(ref w, r);
+            }
         }
 
         void OnMenuItemActivatedUnmarked(object sender, EventArgs args){
