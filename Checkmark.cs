@@ -35,17 +35,15 @@ namespace Tomboy.Checkmark{
 
         Gtk.MenuItem item;
 
-        static string[] UNCHECK_PATTERNS = {
-            "[ ]",
-            "[]"
-        };
+        static string[] UNCHECK_PATTERNS = {"[ ]", "[]"};
+        static string[] CHECK_PATTERNS = {"[v]", "[V]"};
+        static string[] XMARK_PATTERNS = {"[x]", "[X]"};
 
-        static string[] CHECK_PATTERNS = {
-            "[x]",
-            "[X]",
-            "[v]",
-            "[V]"
-        };
+        static string CHECK_UNMARKED = "☐";
+        static string CHECK_MARKED = "☑";
+        static string CHECK_XMARKED = "☒";
+        static string CHECK_TICK = "✓";
+        static string CHECK_BALLOTX = "✗";
 
         public override void Initialize(){
             item = new Gtk.MenuItem(Catalog.GetString("Insert checkbox"));
@@ -56,29 +54,43 @@ namespace Tomboy.Checkmark{
             item.Activated += OnMenuItemActivatedMarked;
             item.Show();
             AddPluginMenuItem(item);
+            item = new Gtk.MenuItem(Catalog.GetString("Insert X marked checkbox"));
+            item.Activated += OnMenuItemActivatedXMarked;
+            item.Show();
+            AddPluginMenuItem(item);
+            item = new Gtk.MenuItem(Catalog.GetString("Insert tick"));
+            item.Activated += OnMenuItemActivatedTick;
+            item.Show();
+            AddPluginMenuItem(item);
+            item = new Gtk.MenuItem(Catalog.GetString("Insert X ballot"));
+            item.Activated += OnMenuItemActivatedBallotX;
+            item.Show();
+            AddPluginMenuItem(item);
         }
     
         public override void Shutdown(){
             item.Activated -= OnMenuItemActivatedMarked;
+            item.Activated -= OnMenuItemActivatedXMarked;
             item.Activated -= OnMenuItemActivatedUnmarked;
+            item.Activated -= OnMenuItemActivatedTick;
+            item.Activated -= OnMenuItemActivatedBallotX;
         }
     
         public override void OnNoteOpened(){
             MakeSubs(); // Text inserted with plugin deactivated changes now.
             Buffer.InsertText += OnInsertText;
-            /* Buffer.DeleteRange += OnDeleteRange;
-            HighlightNote(); */
         }
 
         public void MakeSubs(){
-            string text_marked = "☑";
-            string text_unmarked = "☐";
             NoteBuffer buffer = Note.Buffer;
             foreach (string s in CHECK_PATTERNS) {
-                Reemplazar(buffer, s, text_marked);
+                Reemplazar(buffer, s, CHECK_MARKED);
             }
             foreach (string s in UNCHECK_PATTERNS) {
-                Reemplazar(buffer, s, text_unmarked);
+                Reemplazar(buffer, s, CHECK_UNMARKED);
+            }
+            foreach (string s in XMARK_PATTERNS) {
+                Reemplazar(buffer, s, CHECK_XMARKED);
             }
         }
 
@@ -132,56 +144,38 @@ namespace Tomboy.Checkmark{
         }
 
         void OnMenuItemActivatedUnmarked(object sender, EventArgs args){
-            string text_unmarked = "☐";
-
-            // Logger.Log("Activated 'Insert checkbox' menu item.");
-
             NoteBuffer buffer = Note.Buffer;
             Gtk.TextIter cursor = buffer.GetIterAtMark (buffer.InsertMark);
-            buffer.InsertWithTagsByName (ref cursor, text_unmarked, "checkbox");
+            buffer.InsertWithTagsByName (ref cursor, CHECK_UNMARKED, "checkbox");
         }
 
         void OnMenuItemActivatedMarked(object sender, EventArgs args){
-            string text_marked = "☑";
-
             NoteBuffer buffer = Note.Buffer;
             Gtk.TextIter cursor = buffer.GetIterAtMark (buffer.InsertMark);
-            buffer.InsertWithTagsByName (ref cursor, text_marked, "marked_checkbox");
+            buffer.InsertWithTagsByName (ref cursor, CHECK_MARKED, "marked_checkbox");
+        }
+
+        void OnMenuItemActivatedXMarked(object sender, EventArgs args){
+            NoteBuffer buffer = Note.Buffer;
+            Gtk.TextIter cursor = buffer.GetIterAtMark (buffer.InsertMark);
+            buffer.InsertWithTagsByName (ref cursor, CHECK_XMARKED, "xmarked_checkbox");
+        }
+
+        void OnMenuItemActivatedTick(object sender, EventArgs args){
+            NoteBuffer buffer = Note.Buffer;
+            Gtk.TextIter cursor = buffer.GetIterAtMark (buffer.InsertMark);
+            buffer.InsertWithTagsByName (ref cursor, CHECK_TICK, "tick");
+        }
+
+        void OnMenuItemActivatedBallotX(object sender, EventArgs args){
+            NoteBuffer buffer = Note.Buffer;
+            Gtk.TextIter cursor = buffer.GetIterAtMark (buffer.InsertMark);
+            buffer.InsertWithTagsByName (ref cursor, CHECK_BALLOTX, "ballot_x");
         }
 
         private void OnInsertText(object sender, Gtk.InsertTextArgs args){
             MakeSubs();
         }
 
-        /*
-        private void OnDeleteRange (object sender, Gtk.DeleteRangeArgs args){
-            HighlightRegion(args.Start, args.End);
-        }
-    
-        private void HighlightNote(){
-            HighlightRegion(Buffer.StartIter, Buffer.EndIter);
-        }
-    
-        private void HighlightRegion(Gtk.TextIter start, Gtk.TextIter end){
-            if (!start.StartsLine())
-                start.BackwardLine();
-            if (!end.EndsLine())
-                end.ForwardLine();
-    
-            foreach (string pattern in TODO_PATTERNS) {
-                HighlightRegion(pattern, start, end);
-            }
-        }
-    
-        private void HighlightRegion(string pattern, Gtk.TextIter start, Gtk.TextIter end){
-            Buffer.RemoveTag(pattern, start, end);
-            Gtk.TextIter region_start = start;
-            while (start.ForwardSearch(pattern + ":", TextSearchFlags.TextOnly, out region_start, out start, end)){
-                Gtk.TextIter region_end = start;
-                //region_end.ForwardSentenceEnd();
-                Buffer.ApplyTag(pattern, region_start, region_end);
-            }
-        }
-        */
     }
 }
