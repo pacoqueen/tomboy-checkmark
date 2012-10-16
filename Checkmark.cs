@@ -46,40 +46,49 @@ namespace Tomboy.Checkmark{
         static string CHECK_BALLOTX = "✗";
 
         public override void Initialize(){
-            item = new Gtk.MenuItem(Catalog.GetString("Insert checkbox"));
-            item.Activated += OnMenuItemActivatedUnmarked;
-            item.Show();
-            AddPluginMenuItem(item);
-            item = new Gtk.MenuItem(Catalog.GetString("Insert marked checkbox"));
-            item.Activated += OnMenuItemActivatedMarked;
-            item.Show();
-            AddPluginMenuItem(item);
-            item = new Gtk.MenuItem(Catalog.GetString("Insert X marked checkbox"));
-            item.Activated += OnMenuItemActivatedXMarked;
-            item.Show();
-            AddPluginMenuItem(item);
-            item = new Gtk.MenuItem(Catalog.GetString("Insert tick"));
-            item.Activated += OnMenuItemActivatedTick;
-            item.Show();
-            AddPluginMenuItem(item);
-            item = new Gtk.MenuItem(Catalog.GetString("Insert X ballot"));
-            item.Activated += OnMenuItemActivatedBallotX;
-            item.Show();
-            AddPluginMenuItem(item);
+            Gtk.MenuItem itemInsert = new Gtk.MenuItem(Catalog.GetString("Insert checkbox"));
+            itemInsert.Activated += OnMenuItemActivatedUnmarked;
+            itemInsert.Show();
+            AddPluginMenuItem(itemInsert);
+            itemMarked = new Gtk.MenuItem(Catalog.GetString("Insert marked checkbox"));
+            itemMarked.Activated += OnMenuItemActivatedMarked;
+            itemMarked.Show();
+            AddPluginMenuItem(itemMarked);
+            itemXMarked = new Gtk.MenuItem(Catalog.GetString("Insert X marked checkbox"));
+            itemXMarked.Activated += OnMenuItemActivatedXMarked;
+            itemXMarked.Show();
+            AddPluginMenuItem(itemXMarked);
+            itemTick = new Gtk.MenuItem(Catalog.GetString("Insert tick"));
+            itemTick.Activated += OnMenuItemActivatedTick;
+            itemTick.Show();
+            AddPluginMenuItem(itemTick);
+            itemBallot = new Gtk.MenuItem(Catalog.GetString("Insert X ballot"));
+            itemBallot.Activated += OnMenuItemActivatedBallotX;
+            itemBallot.Show();
+            AddPluginMenuItem(itemBallot);
+            itemToggle = new Gtk.MenuItem(Catalog.GetString("Toggle checkmark"));
+            itemToggle.Activated += OnMenuItemActivatedToggle;
+            AddPluginMenuItem(itemToggle);
+            Gtk.AccelGroup accel_group = new Gtk.AccelGroup();
+            Window.AddAccelGroup(accel_group);
+            itemToggle.AddAccelerator("activate", accel_group, ord("M"),
+                                      Gdk.Gtk.CONTROL_MASK, Gtk.ACCEL_VISIBLE);
+            itemToggle.Show();
         }
     
         public override void Shutdown(){
-            item.Activated -= OnMenuItemActivatedMarked;
-            item.Activated -= OnMenuItemActivatedXMarked;
-            item.Activated -= OnMenuItemActivatedUnmarked;
-            item.Activated -= OnMenuItemActivatedTick;
-            item.Activated -= OnMenuItemActivatedBallotX;
+            itemInsert.Activated -= OnMenuItemActivatedUnmarked;
+            itemMarked.Activated -= OnMenuItemActivatedMarked;
+            itemXMarked.Activated -= OnMenuItemActivatedXMarked;
+            itemTick.Activated -= OnMenuItemActivatedTick;
+            itemBallot.Activated -= OnMenuItemActivatedBallotX;
+            itemToggle.Activated -= OnMenuItemActivatedToggle;
         }
     
         public override void OnNoteOpened(){
             MakeSubs(); // Text inserted with plugin deactivated changes now.
             Buffer.InsertText += OnInsertText;
-			Note.ButtonPressEvent += ButtonPressed;
+            Note.ButtonPressEvent += ButtonPressed;
         }
 
         public void MakeSubs(){
@@ -146,40 +155,109 @@ namespace Tomboy.Checkmark{
 
         void OnMenuItemActivatedUnmarked(object sender, EventArgs args){
             NoteBuffer buffer = Note.Buffer;
-            Gtk.TextIter cursor = buffer.GetIterAtMark (buffer.InsertMark);
-            buffer.InsertWithTagsByName (ref cursor, CHECK_UNMARKED, "checkbox");
+            Gtk.TextIter cursor = buffer.GetIterAtMark(buffer.InsertMark);
+            buffer.InsertWithTagsByName(ref cursor, CHECK_UNMARKED, "checkbox");
         }
 
         void OnMenuItemActivatedMarked(object sender, EventArgs args){
             NoteBuffer buffer = Note.Buffer;
-            Gtk.TextIter cursor = buffer.GetIterAtMark (buffer.InsertMark);
-            buffer.InsertWithTagsByName (ref cursor, CHECK_MARKED, "marked_checkbox");
+            Gtk.TextIter cursor = buffer.GetIterAtMark(buffer.InsertMark);
+            buffer.InsertWithTagsByName(ref cursor, CHECK_MARKED, "marked_checkbox");
         }
 
         void OnMenuItemActivatedXMarked(object sender, EventArgs args){
             NoteBuffer buffer = Note.Buffer;
-            Gtk.TextIter cursor = buffer.GetIterAtMark (buffer.InsertMark);
-            buffer.InsertWithTagsByName (ref cursor, CHECK_XMARKED, "xmarked_checkbox");
+            Gtk.TextIter cursor = buffer.GetIterAtMark(buffer.InsertMark);
+            buffer.InsertWithTagsByName(ref cursor, CHECK_XMARKED, "xmarked_checkbox");
         }
 
         void OnMenuItemActivatedTick(object sender, EventArgs args){
             NoteBuffer buffer = Note.Buffer;
-            Gtk.TextIter cursor = buffer.GetIterAtMark (buffer.InsertMark);
-            buffer.InsertWithTagsByName (ref cursor, CHECK_TICK, "tick");
+            Gtk.TextIter cursor = buffer.GetIterAtMark(buffer.InsertMark);
+            buffer.InsertWithTagsByName(ref cursor, CHECK_TICK, "tick");
         }
 
         void OnMenuItemActivatedBallotX(object sender, EventArgs args){
             NoteBuffer buffer = Note.Buffer;
-            Gtk.TextIter cursor = buffer.GetIterAtMark (buffer.InsertMark);
-            buffer.InsertWithTagsByName (ref cursor, CHECK_BALLOTX, "ballot_x");
+            Gtk.TextIter cursor = buffer.GetIterAtMark(buffer.InsertMark);
+            buffer.InsertWithTagsByName(ref cursor, CHECK_BALLOTX, "ballot_x");
+        }
+
+        void OnMenuItemActivatedToggle(object sender, EventArgs args){
+            // Moves along the line backward and forward until reaches begin or end of
+            // line or a mark. Then exit or it toggles.
+            NoteBuffer buffer = Note.Buffer;
+            Gtk.TextMark insert_mark = InsertMark;
+            Gtk.TextIter backFinder = GetIterAtMark(insert_mark);
+            Gtk.TextIter frontFinder = GetIterAtMark(insert_mark);
+            Gtk.TextIter BOL = GetIterAtMark(insert_mark);
+            Gtk.TextIter EOL = GetIterAtMark(insert_mark);
+            do{
+                if (currentCharIsMark(backFinder)){
+                    ToggleMark(backFinder);
+                    break;
+                }else{
+                    backFinder.BackwardChar();
+                }
+                if (currentCharIsMark(frontFinder)){
+                    ToggleMark(frontFinder);
+                    break;
+                }else{
+                    frontFinder.ForwardChar();
+                }
+            }while (backFinder != BOL && frontFinder != EOL);
+        }
+
+        private bool currentCharIsMark(Gtk.TextIter iter){
+            /*
+             * Returns true when char under iter is any of mark predefined symbols.
+             */
+            foreach (string s in CHECK_PATTERNS) {
+                if (iter.GetChar() == s)
+                    return true;
+            }
+            return false;
+        }
+
+        private void ToggleMark(Gtk.TextIter iter){
+            /*
+             * If char under iter is a maked symbol, changes for an unmarked symbol and
+             * viceversa.
+             */
+            string uchar;
+            Gtk.NoteBuffer b;
+            Gtk.TextIter iterNext;
+            bool found = true;
+            string charToggled = "";
+
+            b = iter.getBuffer();
+            iterNext = iter;
+            iterNext.Fordward();
+            if (uchar == CHECK_UNMARKED /* ☐ */ ){
+                charToggled = CHECK_MARKED;
+            }else if (uchar == CHECK_MARKED /* ☑ */ ){
+                charToggled = CHECK_UNMARKED;
+            }else if (uchar == CHECK_XMARKED /* ☒ */ ){
+                charToggled = CHECK_UNMARKED;
+            }else if (uchar == CHECK_TICK /* ✓ */ ){
+                charToggled = CHECK_UNMARKED;
+            }else if (uchar == CHECK_BALLOTX /* ✗ */ ){
+                charToggled = CHECK_UNMARKED;
+            }else{
+                found = false;
+            }
+            if (found){
+                b.Delete(ref iter, ref iterNext);
+                b.Insert(ref iter, charToggled);
+            }
         }
 
         private void OnInsertText(object sender, Gtk.InsertTextArgs args){
             MakeSubs();
         }
-		
-		private void ButtonPressed(object sender, Gtk.ButtonPressEventArgs args){
-			Logger.Info("SOY YO");
-		}
+
+        private void ButtonPressed(object sender, Gtk.ButtonPressEventArgs args){
+            Logger.Info("SOY YO");
+        }
     }
 }
