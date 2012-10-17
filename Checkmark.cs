@@ -25,11 +25,6 @@ using Tomboy;
 using Mono.Unix;
 using System.Collections.Generic;
 
-/* TODO: Al pinchar con el ratón en ☐, cambiar a marcado y viceversa. Dar
-   opción también para tachar el texto a continuación hasta el siguiente salto
-   de línea.
-*/
-
 namespace Tomboy.Checkmark{
     public class CheckmarkAddin:NoteAddin{
 
@@ -95,9 +90,8 @@ namespace Tomboy.Checkmark{
         }
     
         public override void OnNoteOpened(){
-            MakeSubs(); // Text inserted with plugin deactivated changes now.
+            MakeSubs(); // Text inserted with plugin deactivated is now updated.
             Buffer.InsertText += OnInsertText;
-            // Note.ButtonPressEvent += ButtonPressed;
         }
 
         public void MakeSubs(){
@@ -142,7 +136,7 @@ namespace Tomboy.Checkmark{
                     comienzos.Add(b.CreateMark("comienzo" + i.ToString(), ss, false));
                     finales.Add(b.CreateMark("final" + i.ToString(), es, false));
                     i++;
-                    pos = es;   // Search is started after "s" in next iteration
+                    pos = es;   // Search is started after «s» in next iteration
                     // (Tomboy:7048): Gtk-WARNING **: Invalid text buffer iterator...
                     //b.Delete(ref ss, ref es);
                     //w = b.GetIterAtMark(m);
@@ -243,7 +237,7 @@ namespace Tomboy.Checkmark{
 
         private void ToggleMark(Gtk.TextIter iter){
             /*
-             * If char under iter is a maked symbol, changes for an unmarked symbol and
+             * If char under iter is a marked symbol, changes for an unmarked symbol and
              * viceversa.
              */
             string uchar;
@@ -278,10 +272,6 @@ namespace Tomboy.Checkmark{
 
         private void OnInsertText(object sender, Gtk.InsertTextArgs args){
             MakeSubs();
-        }
-
-        private void ButtonPressed(object sender, Gtk.ButtonPressEventArgs args){
-            Logger.Info(" ------------------> ButtonPressEvent");
         }
     }
 }
