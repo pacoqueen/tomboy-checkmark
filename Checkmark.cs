@@ -33,7 +33,12 @@ using System.Collections.Generic;
 namespace Tomboy.Checkmark{
     public class CheckmarkAddin:NoteAddin{
 
-        Gtk.MenuItem item;
+        Gtk.MenuItem itemInsert;
+        Gtk.MenuItem itemMarked;
+        Gtk.MenuItem itemXMarked;
+        Gtk.MenuItem itemTick;
+        Gtk.MenuItem itemBallot;
+        Gtk.MenuItem itemToggle;
 
         static string[] UNCHECK_PATTERNS = {"[ ]", "[]"};
         static string[] CHECK_PATTERNS = {"[v]", "[V]"};
@@ -44,29 +49,31 @@ namespace Tomboy.Checkmark{
         static string CHECK_XMARKED = "☒";
         static string CHECK_TICK = "✓";
         static string CHECK_BALLOTX = "✗";
+        
+        static string[] UPATTERNS = {CHECK_MARKED, CHECK_XMARKED, CHECK_TICK, CHECK_BALLOTX, CHECK_UNMARKED};
 
         public override void Initialize(){
-            Gtk.MenuItem itemInsert = new Gtk.MenuItem(Catalog.GetString("Insert checkbox"));
+            itemInsert = new Gtk.MenuItem(Catalog.GetString("Insert checkbox"));
             itemInsert.Activated += OnMenuItemActivatedUnmarked;
             itemInsert.Show();
             AddPluginMenuItem(itemInsert);
-            Gtk.MenuItem itemMarked = new Gtk.MenuItem(Catalog.GetString("Insert marked checkbox"));
+            itemMarked = new Gtk.MenuItem(Catalog.GetString("Insert marked checkbox"));
             itemMarked.Activated += OnMenuItemActivatedMarked;
             itemMarked.Show();
             AddPluginMenuItem(itemMarked);
-            Gtk.MenuItem itemXMarked = new Gtk.MenuItem(Catalog.GetString("Insert X marked checkbox"));
+            itemXMarked = new Gtk.MenuItem(Catalog.GetString("Insert X marked checkbox"));
             itemXMarked.Activated += OnMenuItemActivatedXMarked;
             itemXMarked.Show();
             AddPluginMenuItem(itemXMarked);
-            Gtk.MenuItem itemTick = new Gtk.MenuItem(Catalog.GetString("Insert tick"));
+            itemTick = new Gtk.MenuItem(Catalog.GetString("Insert tick"));
             itemTick.Activated += OnMenuItemActivatedTick;
             itemTick.Show();
             AddPluginMenuItem(itemTick);
-            Gtk.MenuItem itemBallot = new Gtk.MenuItem(Catalog.GetString("Insert X ballot"));
+            itemBallot = new Gtk.MenuItem(Catalog.GetString("Insert X ballot"));
             itemBallot.Activated += OnMenuItemActivatedBallotX;
             itemBallot.Show();
             AddPluginMenuItem(itemBallot);
-            Gtk.MenuItem itemToggle = new Gtk.MenuItem(Catalog.GetString("Toggle checkmark"));
+            itemToggle = new Gtk.MenuItem(Catalog.GetString("Toggle checkmark"));
             itemToggle.Activated += OnMenuItemActivatedToggle;
             AddPluginMenuItem(itemToggle);
             Gtk.AccelGroup accel_group = new Gtk.AccelGroup();
@@ -90,7 +97,7 @@ namespace Tomboy.Checkmark{
         public override void OnNoteOpened(){
             MakeSubs(); // Text inserted with plugin deactivated changes now.
             Buffer.InsertText += OnInsertText;
-            Note.ButtonPressEvent += ButtonPressed;
+            // Note.ButtonPressEvent += ButtonPressed;
         }
 
         public void MakeSubs(){
@@ -186,39 +193,52 @@ namespace Tomboy.Checkmark{
         }
 
         void OnMenuItemActivatedToggle(object sender, EventArgs args){
-            // Moves along the line backward and forward until reaches begin or end of
+            // Moves along the line backward and forward until reaches begin and end of
             // line or a mark. Then exit or it toggles.
             NoteBuffer buffer = Note.Buffer;
-            Gtk.TextMark insert_mark = InsertMark;
-            Gtk.TextIter backFinder = GetIterAtMark(insert_mark);
-            Gtk.TextIter frontFinder = GetIterAtMark(insert_mark);
-            Gtk.TextIter BOL = GetIterAtMark(insert_mark);
-            Gtk.TextIter EOL = GetIterAtMark(insert_mark);
+            Gtk.TextMark insert_mark = buffer.InsertMark;
+            Gtk.TextIter backFinder = buffer.GetIterAtMark(insert_mark);
+            Gtk.TextIter frontFinder = buffer.GetIterAtMark(insert_mark);
+            Gtk.TextIter BOL = buffer.GetIterAtMark(insert_mark);
+            Gtk.TextIter EOL = buffer.GetIterAtMark(insert_mark);
+            
+            while (! BOL.StartsLine()) BOL.BackwardChar();
+            BOL.BackwardChar();   // I need JUST one char before start of line.
+            while (! EOL.EndsLine()) EOL.ForwardChar();
             do{
-                if (currentCharIsMark(backFinder)){
+                if (CurrentCharIsMark(backFinder)){
                     ToggleMark(backFinder);
                     break;
                 }else{
-                    backFinder.BackwardChar();
+                    if (! backFinder.Equal(BOL))
+                        backFinder.BackwardChar();
                 }
-                if (currentCharIsMark(frontFinder)){
+                if (CurrentCharIsMark(frontFinder)){
                     ToggleMark(frontFinder);
                     break;
                 }else{
-                    frontFinder.ForwardChar();
+                    if (! frontFinder.Equal(EOL))
+                        frontFinder.ForwardChar();
                 }
-            }while (backFinder != BOL && frontFinder != EOL);
+            }while (! (backFinder.Equal(BOL) && frontFinder.Equal(EOL)));
         }
 
-        private bool currentCharIsMark(Gtk.TextIter iter){
+        private bool CurrentCharIsMark(Gtk.TextIter iter){
             /*
              * Returns true when char under iter is any of mark predefined symbols.
              */
-            foreach (string s in CHECK_PATTERNS) {
-                if (iter.GetChar() == s)
-                    return true;
+            Gtk.TextIter siguiente = new Gtk.TextIter();
+            siguiente = iter;
+            siguiente.ForwardChar();
+            bool res = false;
+            string car = iter.GetText(siguiente);
+            foreach (string s in UPATTERNS) {
+                if (car == s){
+                    res = true;
+                    break;
+                }
             }
-            return false;
+            return res;
         }
 
         private void ToggleMark(Gtk.TextIter iter){
@@ -227,14 +247,16 @@ namespace Tomboy.Checkmark{
              * viceversa.
              */
             string uchar;
-            Gtk.NoteBuffer b;
+            Gtk.TextBuffer b;
             Gtk.TextIter iterNext;
-            bool found = true;
             string charToggled = "";
-
-            b = iter.getBuffer();
+            bool found = true;
+                       
+            b = iter.Buffer;
             iterNext = iter;
-            iterNext.Fordward();
+            iterNext.ForwardChar();
+            uchar = iter.GetText(iterNext);
+            
             if (uchar == CHECK_UNMARKED /* ☐ */ ){
                 charToggled = CHECK_MARKED;
             }else if (uchar == CHECK_MARKED /* ☑ */ ){
@@ -259,7 +281,7 @@ namespace Tomboy.Checkmark{
         }
 
         private void ButtonPressed(object sender, Gtk.ButtonPressEventArgs args){
-            Logger.Info("SOY YO");
+            Logger.Info(" ------------------> ButtonPressEvent");
         }
     }
 }
