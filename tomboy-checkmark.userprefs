@@ -1,20 +1,21 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Checkmark.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Checkmark.addin.xml">
     <Files>
+<<<<<<< HEAD
       <File FileName="Checkmark.cs" Line="44" Column="23" />
       <File FileName="Checkmark.addin.xml" Line="1" Column="1" />
+=======
+      <File FileName="Checkmark.cs" Line="49" Column="25" />
+      <File FileName="Checkmark.addin.xml" Line="8" Column="13" />
+>>>>>>> bdb55cd67cbb480e7fa9393f3928a15b9be7b0ec
       <File FileName="compile.sh" Line="1" Column="1" />
-      <File FileName="README" Line="7" Column="1" />
+      <File FileName="README" Line="2" Column="1" />
+      <File FileName="Checkmark.cs" Line="49" Column="25" />
+      <File FileName="Checkmark.addin.xml" Line="8" Column="13" />
+      <File FileName="compile.sh" Line="1" Column="1" />
+      <File FileName="README" Line="2" Column="1" />
     </Files>
-    <Pads>
-      <Pad Id="ProjectPad">
-        <State expanded="True">
-          <Node name="Solution Items" expanded="True" />
-          <Node name="tomboy-checkmark" expanded="True" selected="True" />
-        </State>
-      </Pad>
-    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
