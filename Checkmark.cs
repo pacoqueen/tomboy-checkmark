@@ -50,29 +50,31 @@ namespace Tomboy.Checkmark{
             itemInsert.Activated += OnMenuItemActivatedUnmarked;
             itemInsert.Show();
             AddPluginMenuItem(itemInsert);
-            itemMarked = new Gtk.MenuItem(Catalog.GetString("Insert marked checkbox"));
+            Gtk.MenuItem itemMarked = new Gtk.MenuItem(Catalog.GetString("Insert marked checkbox"));
             itemMarked.Activated += OnMenuItemActivatedMarked;
             itemMarked.Show();
             AddPluginMenuItem(itemMarked);
-            itemXMarked = new Gtk.MenuItem(Catalog.GetString("Insert X marked checkbox"));
+            Gtk.MenuItem itemXMarked = new Gtk.MenuItem(Catalog.GetString("Insert X marked checkbox"));
             itemXMarked.Activated += OnMenuItemActivatedXMarked;
             itemXMarked.Show();
             AddPluginMenuItem(itemXMarked);
-            itemTick = new Gtk.MenuItem(Catalog.GetString("Insert tick"));
+            Gtk.MenuItem itemTick = new Gtk.MenuItem(Catalog.GetString("Insert tick"));
             itemTick.Activated += OnMenuItemActivatedTick;
             itemTick.Show();
             AddPluginMenuItem(itemTick);
-            itemBallot = new Gtk.MenuItem(Catalog.GetString("Insert X ballot"));
+            Gtk.MenuItem itemBallot = new Gtk.MenuItem(Catalog.GetString("Insert X ballot"));
             itemBallot.Activated += OnMenuItemActivatedBallotX;
             itemBallot.Show();
             AddPluginMenuItem(itemBallot);
-            itemToggle = new Gtk.MenuItem(Catalog.GetString("Toggle checkmark"));
+            Gtk.MenuItem itemToggle = new Gtk.MenuItem(Catalog.GetString("Toggle checkmark"));
             itemToggle.Activated += OnMenuItemActivatedToggle;
             AddPluginMenuItem(itemToggle);
             Gtk.AccelGroup accel_group = new Gtk.AccelGroup();
             Window.AddAccelGroup(accel_group);
-            itemToggle.AddAccelerator("activate", accel_group, ord("M"),
-                                      Gdk.Gtk.CONTROL_MASK, Gtk.ACCEL_VISIBLE);
+            itemToggle.AddAccelerator("activate", accel_group,
+                                      new AccelKey(Gdk.Key.m,
+                                                   Gdk.ModifierType.ControlMask,
+                                                   AccelFlags.Visible));
             itemToggle.Show();
         }
     
